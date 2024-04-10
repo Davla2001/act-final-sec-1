@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina principal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-container input[type=text] {
+            flex: 1;
+            padding: 6px;
+            margin-top: 8px;
+            font-size: 17px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .search-container input[type=text]:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="/aplicaciones/Index.html"><div class="banner"></div>
+    <div class="navbar">
+        <a href="TablaProducto.html">Productos</a>
+        <a href="TablaPedido.html">Pedidos</a>
+        <a class="active" href="TablaProveedor.html">Proveedores</a>
+        <a href="TablaVenta.html">Ventas</a>
+    </div>
+    <div class="content" id="content">
+        <div class="search-container ">
+            <input class="w3-border-bottom w3-border-blue" type="text" placeholder="Buscar por nombre o ID..." id="searchInput">
+            <button class="w3-button w3-blue" id="addButton"><a href="RegistroProveedor.html">Agregar Nuevo</a></button>
+        </div>
+        <table class="w3-table w3-striped w3-bordered w3-hoverable w3-blue w3-text-black">
+            <thead>
+                <tr>
+                    <th>ED proveedor</th>
+                    <th>Nombre</th>
+                    <th>Telefono</th>
+                    <th>Direccion</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbl_datos">
+                <!-- Aquí se insertarán las filas de datos dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    window.onload = function() {
+        fetch('http://localhost/aplicaciones/php/leer-proveedor.php')
+        .then(response => {
+            if(response.ok) {
+                response.json()
+                .then(function(datosjson) {
+                    datos = datosjson.slice(0,)
+                    let s = "";
+                    datos.forEach(element => {
+                        s += `
+                            <tr>
+                            <td>${element.id_proveedor}</td>
+                            <td>${element.nom_proveedor}</td>
+                            <td>${element.telefono}</td>
+                            <td>${element.direccion}</td>
+                            <td>${element.email}</td>
+                            <td class="action-buttons">
+                                <button class="w3-button w3-hover-green" onclick="modificar(${element.id_proveedor}, '${element.nom_proveedor}', '${element.telefono}', '${element.direccion}', '${element.email}')">Modificar</button>
+                                <button class="w3-button w3-hover-red" onclick="confirmarEliminar(${element.id_proveedor})">Eliminar</button>
+                            </td>
+                            </tr>
+                        `;
+                    });
+                    document.querySelector("#tbl_datos").innerHTML = s;
+                });
+            }
+        })
+    }
+
+    // Función para buscar elementos por nombre o ID
+    document.getElementById("searchInput").addEventListener("input", function() {
+        var filter, table, tr, td, i, txtValue;
+        filter = this.value.toUpperCase();
+        table = document.getElementById("tbl_datos");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td"); 
+            let found = false;
+            for (let j = 0; j < td.length; j++) {
+                let cell = td[j];
+                if (cell) {
+                    txtValue = cell.textContent || cell.innerText;
+                    if (j === 0 || j === 1) { // Buscar solo en la primera y segunda columna (ID y nombre)
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (found) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    });
+
+    // Función para modificar un elemento
+function modificar(id, nombre, telefono, direccion, email) {
+    // Redireccionar al formulario de modificación con los datos del producto como parámetros de la URL
+    window.location.href = `ModificarProveedor.html?id=${id}&nombre=${nombre}&telefono=${telefono}&direccion=${direccion}&email=${email}`;
+}
+
+    // Función para confirmar la eliminación de un elemento
+    function confirmarEliminar(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+            // Enviar solicitud POST al archivo eliminar-producto.php
+            fetch('http://localhost/aplicaciones/php/eliminar-proveedor.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'id=' + id
+            })
+            .then(response => {
+                if(response.ok) {
+                    response.text()
+                    .then(function(message) {
+                        alert(message); // Mostrar mensaje de confirmación o error
+                        // Recargar la página para actualizar la lista de productos después de la eliminación
+                        location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar el proveedor:', error);
+                alert('Error al eliminar el proveedor.');
+            });
+        }
+    }
+</script>
+</html>

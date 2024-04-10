@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina principal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        /* Estilos para el formulario de inserción */
+        .form-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form-container input[type="text"],
+        .form-container input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-container input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .form-container input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilos para el mensaje de confirmación o error */
+        #mensaje {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .exito {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <a href="/aplicaciones/Index.html"><div class="banner"></div>
+    <div class="navbar">
+        <a href="TablaProducto.html">Productos</a>
+        <a class="active" href="TablaPedido.html">Pedidos</a>
+        <a href="TablaProveedor.html">Proveedores</a>
+        <a href="TablaVenta.html">Ventas</a>
+    </div>
+    <div class="content" id="content">
+        <!-- Formulario de inserción -->
+        <div class="form-container">
+            <h2>Insertar Nuevo Registro</h2>
+            <form id="formInsertar" action="php/insertar-pedido.php" method="POST">
+                <label for="fecha_pedido">Fecha:</label>
+                <input class="date" type="date"  name="fecha_pedido" required >
+
+                <label for="id_producto">Id del producto:</label>
+                <input type="number" min="1" placeholder="Ingrese el Id del producto" name="id_producto" required>
+
+                <label for="id_proveedor">Id del proveedor:</label>
+                <input type="number" min="1" placeholder="Ingrese el Id del proveedor" name="id_proveedor" required>
+
+                <label for="cantidad_solicitada">Cantidad solicitada:</label>
+                <input type="number" min="1" placeholder="Ingrese la cantidad" name="cantidad_solicitada" required>
+
+                <label for="estado">Estado del producto:</label>
+                <input type="text" placeholder="Ingrese el estado" name="estado" required>
+
+                <label for="fecha_surtido">Fecha de entrega:</label>
+                <input type="date" placeholder="Ingrese la fecha" name="fecha_surtido" required>
+
+                <label for="costo_pedido">Costo del pedido:</label>
+                <input type="number" min="0.00" placeholder="Ingrese la cantidad" name="costo_pedido" required>
+
+                <button class="w3-button w3-blue" type="submit">Insertar</button>
+            </form>
+            <!-- Mensaje de confirmación o error -->
+            <div id="mensaje" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener la fecha y hora actual del dispositivo
+        var fechaActual = new Date().toISOString().slice(0, 10);
+
+        // Asignar los valores a los campos de entrada
+        document.getElementById("fecha_pedido").value = fechaActual;
+    </script>
+
+    <!-- Script JavaScript para mostrar mensajes -->
+    <script>
+        // Mostrar mensaje de confirmación o error después de enviar el formulario
+        const formInsertar = document.getElementById('formInsertar');
+        formInsertar.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar que el formulario se envíe por defecto
+
+            // Realizar la petición POST con Fetch API
+            fetch(formInsertar.action, {
+                method: formInsertar.method,
+                body: new FormData(formInsertar),
+            })
+            .then(response => response.text())
+            .then(mensaje => {
+                // Mostrar el mensaje de confirmación o error
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.textContent = mensaje;
+                mensajeDiv.style.display = 'block';
+                mensajeDiv.classList.add(mensaje.includes('correctamente') ? 'exito' : 'error');
+            })
+            .catch(error => {
+                console.error('Error al enviar el formulario:', error);
+            });
+        });
+    </script>
+</body>
+</html>

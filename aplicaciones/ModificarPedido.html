@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Producto</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        /* Estilos para el formulario de modificación */
+        .form-container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .form-container input[type="text"],
+        .form-container input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-container input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .form-container input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Estilos para el campo de ID */
+        .form-container input[type="text"].readonly {
+            background-color: #f2f2f2;
+            cursor: not-allowed;
+        }
+
+        /* Estilos para el mensaje de confirmación o error */
+        #mensaje {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .exito {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <a href="/aplicaciones/Index.html"><div class="banner"></div>
+    <div class="navbar">
+        <a href="TablaProducto.html">Productos</a>
+        <a class="active" href="TablaPedido.html">Pedidos</a>
+        <a href="TablaProveedor.html">Proveedores</a>
+        <a href="TablaVenta.html">Ventas</a>
+    </div>
+    <div class="content" id="content">
+        <!-- Formulario de modificación -->
+        <div class="form-container">
+            <h2>Modificar Registro</h2>
+            <form id="formModificar" action="php/modificar-pedido.php" method="POST">
+                <label for="id_pedido">ID:</label>
+                <!-- Campo de ID readonly -->
+                <input type="text" placeholder="ID" id="id_pedido" name="id_pedido" class="readonly" readonly>
+
+                <label for="fecha_pedido">Fecha del pedido:</label>
+                <input type="text" placeholder="Fecha" id="fecha_pedido" name="fecha_pedido" required readonly>
+
+                <label for="id_producto">Id del producto:</label>
+                <input type="num" min="0" placeholder="Ingrese el id del producto" id="id_producto" name="id_producto" required>
+
+                <label for="id_proveedor">Id del proveedor:</label>
+                <input type="num" min="0" placeholder="Ingrese el id del proveedor" id="id_proveedor" name="id_proveedor" required>
+                
+                <label for="cantidad_solicitada">Cantidad de productos:</label>
+                <input type="num" min="0" placeholder="Ingrese la cantidad" id="cantidad_solicitada" name="cantidad_solicitada" required>
+
+                <label for="estado">Estado:</label>
+                <input type="text" placeholder="Ingrese el estado" id="estado" name="estado" required>
+
+                <label for="fecha_surtido">Fecha de surtido:</label>
+                <input type="date" placeholder="Ingrese la fecha" id="fecha_surtido" name="fecha_surtido" required>
+
+                <label for="costo_pedido">Costo del pedido:</label>
+                <input type="num" placeholder="Ingrese el costo" id="costo_pedido" name="costo_pedido" required>
+
+                <button class="w3-button w3-blue" type="submit">Modificar</button>
+            </form>
+            <!-- Mensaje de confirmación o error -->
+            <div id="mensaje" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Script JavaScript para completar el formulario y mostrar mensajes -->
+    <script>
+        // Obtener los parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const id_pedido = params.get('id_pedido');
+        const fecha_pedido= params.get('fecha_pedido');
+        const id_producto = params.get('id_producto');
+        const id_proveedor = params.get('id_proveedor');
+        const cantidad_solicitada = params.get('cantidad_solicitada');
+        const estado = params.get('estado');
+        const fecha_surtido = params.get('fecha_surtido');
+        const costo_pedido = params.get('costo_pedido');
+
+        // Completar el formulario con los datos del producto seleccionado
+        document.getElementById("id_pedido").value = id_pedido;
+        document.getElementById("fecha_pedido").value = fecha_pedido;
+        document.getElementById("id_producto").value = id_producto;
+        document.getElementById("id_proveedor").value = id_proveedor;
+        document.getElementById("cantidad_solicitada").value = cantidad_solicitada;
+        document.getElementById("estado").value = estado;
+        document.getElementById("fecha_surtido").value = fecha_surtido;
+        document.getElementById("costo_pedido").value = costo_pedido;
+
+        // Mostrar mensaje de confirmación o error después de enviar el formulario
+        const formModificar = document.getElementById('formModificar');
+        formModificar.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar que el formulario se envíe por defecto
+
+            // Realizar la petición al servidor
+            fetch('php/modificar-pedido.php', {
+                method: 'POST',
+                body: new FormData(formModificar),
+            })
+            .then(response => response.text())
+            .then(mensaje => {
+                // Mostrar el mensaje de confirmación o error
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.textContent = mensaje;
+                mensajeDiv.style.display = 'block';
+                mensajeDiv.classList.add(mensaje.includes('correctamente') ? 'exito' : 'error');
+            })
+            .catch(error => {
+                console.error('Error al enviar el formulario:', error);
+            });
+        });
+    </script>
+</body>
+</html>

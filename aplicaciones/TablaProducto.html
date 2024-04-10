@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina principal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-container input[type=text] {
+            flex: 1;
+            padding: 6px;
+            margin-top: 8px;
+            font-size: 17px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .search-container input[type=text]:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="/aplicaciones/Index.html"><div class="banner"></div>
+    <div class="navbar">
+        <a class="active" href="TablaProducto.html">Productos</a>
+        <a href="TablaPedido.html">Pedidos</a>
+        <a href="TablaProveedor.html">Proveedores</a>
+        <a href="TablaVenta.html">Ventas</a>
+    </div>
+    <div class="content" id="content">
+        <div class="search-container ">
+            <input class="w3-border-bottom w3-border-blue" type="text" placeholder="Buscar por nombre o ID..." id="searchInput">
+            <button class="w3-button w3-blue" id="addButton"><a href="RegistroProducto.html">Agregar Nuevo</a></button>
+        </div>
+        <table class="w3-table w3-striped w3-bordered w3-hoverable w3-blue w3-text-black">
+            <thead>
+                <tr>
+                    <th>id producto</th>
+                    <th>nombre</th>
+                    <th>marca</th>
+                    <th>categoria</th>
+                    <th>stock</th>
+                    <th>precio de compra</th>
+                    <th>precio de venta</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbl_datos">
+                <!-- Aquí se insertarán las filas de datos dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    window.onload = function() {
+        fetch('http://localhost/aplicaciones/php/leer-productos.php')
+        .then(response => {
+            if(response.ok) {
+                response.json()
+                .then(function(datosjson) {
+                    datos = datosjson.slice(0,)
+                    let s = "";
+                    datos.forEach(element => {
+                        s += `
+                            <tr>
+                            <td>${element.id_producto}</td>
+                            <td>${element.nom_producto}</td>
+                            <td>${element.marca}</td>
+                            <td>${element.categoria}</td>
+                            <td>${element.stock}</td>
+                            <td>${element.precio_compra}</td>
+                            <td>${element.precio_venta}</td>
+                            <td class="action-buttons">
+                                <button class="w3-button w3-hover-green" onclick="modificar(${element.id_producto}, '${element.nom_producto}', '${element.marca}', '${element.categoria}', ${element.stock}, ${element.precio_compra}, ${element.precio_venta})">Modificar</button>
+                                <button class="w3-button w3-hover-red" onclick="confirmarEliminar(${element.id_producto})">Eliminar</button>
+                            </td>
+                            </tr>
+                        `;
+                    });
+                    document.querySelector("#tbl_datos").innerHTML = s;
+                });
+            }
+        })
+    }
+
+    // Función para buscar elementos por nombre o ID
+    document.getElementById("searchInput").addEventListener("input", function() {
+        var filter, table, tr, td, i, txtValue;
+        filter = this.value.toUpperCase();
+        table = document.getElementById("tbl_datos");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td"); 
+            let found = false;
+            for (let j = 0; j < td.length; j++) {
+                let cell = td[j];
+                if (cell) {
+                    txtValue = cell.textContent || cell.innerText;
+                    if (j === 0 || j === 1) { // Buscar solo en la primera y segunda columna (ID y nombre)
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (found) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    });
+
+    // Función para modificar un elemento
+function modificar(id, nombre, marca, categoria, stock, precio_compra, precio_venta) {
+    // Redireccionar al formulario de modificación con los datos del producto como parámetros de la URL
+    window.location.href = `ModificarProducto.html?id=${id}&nombre=${nombre}&marca=${marca}&categoria=${categoria}&stock=${stock}&precio_compra=${precio_compra}&precio_venta=${precio_venta}`;
+}
+
+
+    // Función para confirmar la eliminación de un elemento
+    function confirmarEliminar(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+            // Enviar solicitud POST al archivo eliminar-producto.php
+            fetch('http://localhost/aplicaciones/php/eliminar-producto.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'id=' + id
+            })
+            .then(response => {
+                if(response.ok) {
+                    response.text()
+                    .then(function(message) {
+                        alert(message); // Mostrar mensaje de confirmación o error
+                        // Recargar la página para actualizar la lista de productos después de la eliminación
+                        location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al eliminar el producto:', error);
+                alert('Error al eliminar el producto.');
+            });
+        }
+    }
+</script>
+</html>
